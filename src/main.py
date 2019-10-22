@@ -46,6 +46,13 @@ if __name__ == '__main__':
     node1.receive_value('key9', 'value')
     node1.receive_value('key10', 'value')
 
+    ChordNode.new(
+        '2222222222222222222222222222222222222222',
+        network,
+        '8888888888888888888888888888888888888888'
+    )
+
     for hash_val, node in network.nodes.items():
         print(hash_val)
-        print(node.store)
+        # print(node.store)
+        print(node.successor_list)
