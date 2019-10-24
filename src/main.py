@@ -8,24 +8,28 @@ if __name__ == '__main__':
         '0000000000000000000000000000000000000000',
         network,
         '4444444444444444444444444444444444444444',
+        predecessor_hash_val= 'cccccccccccccccccccccccccccccccccccccccc',
     )
 
     node2 = ChordNode(
         '4444444444444444444444444444444444444444',
         network,
         '8888888888888888888888888888888888888888',
+        predecessor_hash_val='0000000000000000000000000000000000000000',
     )
 
     node3 = ChordNode(
         '8888888888888888888888888888888888888888',
         network,
         'cccccccccccccccccccccccccccccccccccccccc',
+        predecessor_hash_val='4444444444444444444444444444444444444444',
     )
 
     node4 = ChordNode(
         'cccccccccccccccccccccccccccccccccccccccc',
         network,
         '0000000000000000000000000000000000000000',
+        predecessor_hash_val='8888888888888888888888888888888888888888',
     )
 
     network.nodes = {
@@ -52,7 +56,29 @@ if __name__ == '__main__':
         '8888888888888888888888888888888888888888'
     )
 
+    # 結果
+
+    for node in network.nodes.values():
+        node.stabilize_successor()
+
+    ChordNode.new(
+        '3222222222222222222222222222222222222222',
+        network,
+        '8888888888888888888888888888888888888888'
+    )
+
+    ChordNode.new(
+        '1222222222222222222222222222222222222222',
+        network,
+        '8888888888888888888888888888888888888888'
+    )
+
+    for i in range(10):
+        for node in network.nodes.values():
+            node.stabilize_successor()
+
     for hash_val, node in network.nodes.items():
-        print(hash_val)
-        # print(node.store)
-        print(node.successor_list)
+        print(f'Hash: {hash_val}')
+        print(f'Successors: {node.successor_hash_list}')
+        print(f'Predecessor: {node.predecessor}')
+        print('=========')
