@@ -2,6 +2,8 @@ import hashlib
 
 MAX_HASH_VAL = 'ffffffffffffffffffffffffffffffffffffffff'
 MIN_HASH_VAL = '0000000000000000000000000000000000000000'
+# ハッシュのビット長
+BITS = 160
 
 def hash_i(hash_string):
     return int(hash_string, 16)
@@ -15,6 +17,8 @@ class ChordNode:
 
         self.successor_hash_list = [successor_hash_val]
         self.predecessor = predecessor_hash_val
+        # 今回は簡易実装なので、Fingerは2^80先のものだけにする
+        self.finger_hash = None
 
         self.store = dict()
 
@@ -54,6 +58,9 @@ class ChordNode:
             successor_node.challenge_predecessor(self.own_hash_val)
             self.challenge_successor(successor_node.predecessor)
 
+    def stabilize_finger(self):
+        target = hex((hash_i(self.own_hash_val) + (2 ** 159) - 1) % 2 ** 160)
+        self.finger_hash = self.get_successor(target)
 
     def challenge_predecessor(self, predecessor_candidate_hash):
         # predecessorがNoneの場合

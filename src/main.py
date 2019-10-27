@@ -76,9 +76,11 @@ if __name__ == '__main__':
     for i in range(10):
         for node in network.nodes.values():
             node.stabilize_successor()
+            node.stabilize_finger()
 
     for hash_val, node in network.nodes.items():
         print(f'Hash: {hash_val}')
         print(f'Successors: {node.successor_hash_list}')
         print(f'Predecessor: {node.predecessor}')
+        print(f'Finger: {node.finger_hash}')
         print('=========')
