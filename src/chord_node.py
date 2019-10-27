@@ -9,6 +9,11 @@ def hash_i(hash_string):
     return int(hash_string, 16)
 
 
+def clockwise_distance(start, goal):
+    return (hash_i(goal) - hash_i(start)) % 2 ** 160
+
+
+
 class ChordNode:
 
     def __init__(self, own_hash_val, network, successor_hash_val, predecessor_hash_val=None):
@@ -37,7 +42,7 @@ class ChordNode:
     def get_successor(self, hash_val):
         is_next_successor = False
 
-        if self.clockwise_distance(hash_val) < self.clockwise_distance(self.successor_hash_list[0]):
+        if self.clockwise_distance_from_self(hash_val) < self.clockwise_distance_from_self(self.successor_hash_list[0]):
             is_next_successor = True
 
         if not is_next_successor:
@@ -102,7 +107,7 @@ class ChordNode:
         hash_val = hashlib.sha1(key.encode()).hexdigest()
 
         successor_node = self.network.get_node(self.successor_hash_list[0])
-        if not self.clockwise_distance(hash_val) < self.clockwise_distance(self.successor_hash_list[0]):
+        if not self.clockwise_distance_from_self(hash_val) < self.clockwise_distance_from_self(self.successor_hash_list[0]):
             successor_node.receive_value(key, value)
             return
 
@@ -117,11 +122,31 @@ class ChordNode:
     def query_value(self, key):
         print(self.own_hash_val)
         hash_val = hashlib.sha1(key.encode()).hexdigest()
-        if rst := self.store.get(hash_val, None):
+        
+        successor = self.network.get_node(self.successor_hash_list[0])
+
+        if rst := self.store.get(hash_val):
             return rst
 
-        successor_node = self.network.get_node(self.successor_hash_list[0])
+        successor_node = self.network.get_node(self.nearest_node_hash(hash_val))
         return successor_node.query_value(key)
 
-    def clockwise_distance(self, target_hash):
-        return (hash_i(target_hash) - hash_i(self.own_hash_val)) % 2 ** 160
+    # 自分の知っているノードの宛先の中で、与えられたハッシュから１番近いハッシュを返す
+    def nearest_node_hash(self, hash_val):
+        nearest = None
+        nearest_distance = 2 ** 160
+
+        for successor in self.successor_hash_list:
+            if (d := clockwise_distance(hash_val, successor)) < nearest_distance:
+                nearest = successor
+                nearest_distance = d
+        
+        if (d := clockwise_distance(hash_val, self.finger_hash)) < nearest_distance:
+            nearest = self.finger_hash
+            nearest_distance = d
+
+        return nearest
+
+
+    def clockwise_distance_from_self(self, target_hash):
+        return clockwise_distance(self.own_hash_val, target_hash)
