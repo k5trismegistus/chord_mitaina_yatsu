@@ -84,3 +84,5 @@ if __name__ == '__main__':
         print(f'Predecessor: {node.predecessor}')
         print(f'Finger: {node.finger_hash}')
         print('=========')
+
+        import pdb; pdb.set_trace()

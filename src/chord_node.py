@@ -8,6 +8,7 @@ BITS = 160
 def hash_i(hash_string):
     return int(hash_string, 16)
 
+
 class ChordNode:
 
     def __init__(self, own_hash_val, network, successor_hash_val, predecessor_hash_val=None):
@@ -36,15 +37,8 @@ class ChordNode:
     def get_successor(self, hash_val):
         is_next_successor = False
 
-        # ループの0位置を挟まない場合
-        if hash_i(self.own_hash_val) < hash_i(self.successor_hash_list[0]):
-            if hash_i(self.own_hash_val) < hash_i(hash_val) < int(self.successor_hash_list[0], 16):
-                is_next_successor = True
-
-        # 挟む場合
-        else:
-            if hash_i(self.own_hash_val) < hash_i(hash_val) < hash_i(MAX_HASH_VAL) or hash_i(MIN_HASH_VAL) < hash_i(hash_val) < int(self.successor_hash_list[0], 16):
-                is_next_successor = True
+        if self.clockwise_distance(hash_val) < self.clockwise_distance(self.successor_hash_list[0]):
+            is_next_successor = True
 
         if not is_next_successor:
             return self.network.get_node(self.successor_hash_list[0]).get_successor(hash_val)
@@ -107,21 +101,16 @@ class ChordNode:
     def receive_value(self, key, value):
         hash_val = hashlib.sha1(key.encode()).hexdigest()
 
-        is_next_successor = self.get_successor(hash_val)
-
         successor_node = self.network.get_node(self.successor_hash_list[0])
+        if not self.clockwise_distance(hash_val) < self.clockwise_distance(self.successor_hash_list[0]):
+            successor_node.receive_value(key, value)
+            return
 
-        key_value = dict()
-        key_value[key] = value
+        successor_node.store_value(hash_val, key, value)
 
-        successor_node.store_value(hash_val, key_value, is_next_successor)
-
-    # データの保存、自分が担当だった場合は保存、そうでなかったらsuccessorに依頼
+    # データの保存
     def store_value(self, hash_val, key_value, is_successor):
-        if is_successor:
-            self.store[hash_val] = key_value
-        else:
-            is_next_successor = self.get_successor(hash_val)
+        self.store[hash_val] = key_value
 
-            successor_node = self.network.get_node(self.successor_hash_list[0])
-            successor_node.store_value(hash_val, key_value, is_next_successor)
+    def clockwise_distance(self, target_hash):
+        return (hash_i(target_hash) - hash_i(self.own_hash_val)) % 2 ** 160
