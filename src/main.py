@@ -85,4 +85,6 @@ if __name__ == '__main__':
         print(f'Finger: {node.finger_hash}')
         print('=========')
 
+        n = network.get_node('0000000000000000000000000000000000000000')
+
         import pdb; pdb.set_trace()

@@ -109,8 +109,19 @@ class ChordNode:
         successor_node.store_value(hash_val, key, value)
 
     # データの保存
-    def store_value(self, hash_val, key_value, is_successor):
-        self.store[hash_val] = key_value
+    def store_value(self, hash_val, key, value):
+        dt = dict()
+        dt[key] = value
+        self.store[hash_val] = dt
+
+    def query_value(self, key):
+        print(self.own_hash_val)
+        hash_val = hashlib.sha1(key.encode()).hexdigest()
+        if rst := self.store.get(hash_val, None):
+            return rst
+
+        successor_node = self.network.get_node(self.successor_hash_list[0])
+        return successor_node.query_value(key)
 
     def clockwise_distance(self, target_hash):
         return (hash_i(target_hash) - hash_i(self.own_hash_val)) % 2 ** 160
